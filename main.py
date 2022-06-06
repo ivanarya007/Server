@@ -33,7 +33,7 @@ start_time = time.time()
 mongo = MongoDB(
     settings.MONGODB_DOMAIN, settings.MONGODB_USERNAME, settings.MONGODB_PASSWORD
 )
-rclone = {}
+rclone: Dict[str, RCloneAPI] = {}
 
 
 def restart_rclone():
@@ -140,4 +140,4 @@ if os.path.exists("build/index.html"):
 
 startup()
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=settings.PORT, reload=False)

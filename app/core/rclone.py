@@ -296,6 +296,39 @@ class RCloneAPI:
         )
         result = command.stdout
         return result
+    
+    def yield_stream(self, path: str,
+                     chunk_size: int,
+                     offset: int, 
+                     total_size: int,
+                     first_part_cut: int,
+                     last_part_cut: int,
+                     part_count:int):
+        current_part = 1
+        while True:
+            command = run(
+                [
+                    "rclone",
+                    "cat",
+                    f"{self.fs}{path}",
+                    "--header-download",
+                    f"Range: 'bytes={offset}-{offset + chunk_size - 1}'",
+                    "--config",
+                    "rclone.conf",
+                ],
+                stdout=PIPE,
+            )
+            result = command.stdout
+            if not result:
+                break
+            if part_count == 1:
+                yield result[first_part_cut:last_part_cut]
+                break
+            if current_part == 1:
+                yield result[first_part_cut:]
+            if 1 < current_part <= part_count:
+                yield result
+            current_part += 1
 
     def thumbnail(self, id) -> Optional[str]:
         '''
